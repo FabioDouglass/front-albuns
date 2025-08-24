@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Acervo Musical</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/png" href="images/cd.png" />
+  </head>
+  <body>
+    <h1>Acervo Musical</h1>
+
+    <div class="tabs">
+      <button onclick="abrirAba('buscar')">Buscar Álbuns</button>
+      <button onclick="abrirAba('avaliados')">Álbuns Avaliados</button>
+    </div>
+
+    <div id="buscar" class="aba">
+      <input
+        type="text"
+        id="artista"
+        placeholder="Informe o nome do álbum ou artista"
+      />
+      <button onclick="buscarAlbuns()">Buscar</button>
+      <div id="albuns-container"></div>
+    </div>
+
+    <div id="avaliados" class="aba" style="display: none">
+      <h2>Álbuns Avaliados</h2>
+      <div id="albuns-avaliados-container"></div>
+    </div>
+
+    <div id="albuns-container"></div>
+
+    <div id="album-detalhes" class="modal" style="display: none">
+      <div class="modal-content">
+        <span class="close" onclick="fecharDetalhes()">&times;</span>
+        <img id="capa-album" src="" alt="Capa do Album" class="capa-album" />
+        <h2 id="nome-album"></h2>
+        <p id="nome-artista"></p>
+        <p id="data-lancamento"></p>
+        <h3>Faixas:</h3>
+        <ul id="faixas"></ul>
+
+        <!-- Avaliação -->
+        <div class="checkbox-nota">
+          <label>Nota:</label>
+          <div id="notas">
+            <label><input type="radio" name="nota" value="1" />1</label>
+            <label><input type="radio" name="nota" value="2" />2</label>
+            <label><input type="radio" name="nota" value="3" />3</label>
+            <label><input type="radio" name="nota" value="4" />4</label>
+            <label><input type="radio" name="nota" value="5" />5</label>
+          </div>
+          <p id="nota-album" style="margin-top: 5px; font-weight: bold"></p>
+        </div>
+
+        <button onclick="registrarAlbum()">Registrar Avaliação</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
