@@ -34,7 +34,13 @@
     <div id="album-detalhes" class="modal" style="display: none">
       <div class="modal-content">
         <span class="close" onclick="fecharDetalhes()">&times;</span>
-        <img id="capa-album" src="" alt="Capa do Album" class="capa-album" />
+        <div class="album-detalhes-container">
+          <img id="capa-album" src="" alt="Capa do Album" class="capa-album" />
+          <div class="botoes-navegacao">
+            <button onclick="anteriorAlbum()">&#8592; Anterior</button>
+            <button onclick="proximoAlbum()">Próximo &#8594;</button>
+          </div>
+        </div>
         <h2 id="nome-album"></h2>
         <p id="nome-artista"></p>
         <p id="data-lancamento"></p>
@@ -53,8 +59,15 @@
           </div>
           <p id="nota-album" style="margin-top: 5px; font-weight: bold"></p>
         </div>
-
-        <button onclick="registrarAlbum()">Registrar Avaliação</button>
+        <button id="btn-registrar" onclick="registrarAlbum()">
+          Registrar Avaliação
+        </button>
+        <button id="btn-editar" onclick="editarAlbum()">
+          Editar Avaliação
+        </button>
+        <button id="btn-apagar" onclick="apagarAlbum()">
+          Apagar Avaliação
+        </button>
       </div>
     </div>
 

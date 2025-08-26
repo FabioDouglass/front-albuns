@@ -1,4 +1,36 @@
+//vetores para salvar lista de albuns retornados pela api
+let albunsBuscados = [];
+let albunsAvaliados = [];
+let indiceAtual = 0;
+let abaAtual = "buscar";
+
+//controlador de íncide atual
+function abrirDetalhesPorIndice(indice) {
+  indiceAtual = indice;
+  if (abaAtual === "buscar") {
+    abrirDetalhes(albunsBuscados[indiceAtual].collectionId);
+  } else {
+    abrirDetalhes(albunsAvaliados[indiceAtual].collectionId);
+  }
+}
+function proximoAlbum() {
+  let vetor = abaAtual === "buscar" ? albunsBuscados : albunsAvaliados;
+  if (indiceAtual < vetor.length - 1) {
+    indiceAtual++;
+    abrirDetalhesPorIndice(indiceAtual);
+  }
+}
+
+function anteriorAlbum() {
+  if (indiceAtual > 0) {
+    indiceAtual--;
+    abrirDetalhesPorIndice(indiceAtual);
+  }
+}
+
 function buscarAlbuns() {
+  albunsBuscados = [];
+  indiceAtual = 0;
   const artista = document.getElementById("artista").value;
   if (!artista) return alert("Digite o nome do artista");
 
@@ -15,13 +47,14 @@ function buscarAlbuns() {
       const albunsOrdenados = data.results.sort((a, b) => {
         return new Date(b.releaseDate) - new Date(a.releaseDate);
       });
+      albunsBuscados = albunsOrdenados;
 
       albunsOrdenados.forEach((album) => {
         const div = document.createElement("div");
         div.className = "album-card";
         div.innerHTML = `
           <img src="${album.artworkUrl100}" alt="${album.collectionName}">
-          <p>${album.collectionName}</p>
+          <p>${album.collectionName}, ${album.releaseDate.split("-")[0]}</p>
           <p>${album.artistName}</p>
         `;
         div.onclick = () => abrirDetalhes(album.collectionId);
@@ -33,6 +66,11 @@ function buscarAlbuns() {
 let albumAtual = null;
 
 function abrirDetalhes(collectionId) {
+  let vetorAtual = abaAtual === "buscar" ? albunsBuscados : albunsAvaliados;
+  const index = vetorAtual.findIndex((a) => a.collectionId === collectionId);
+  if (index !== -1) {
+    indiceAtual = index;
+  }
   const url = `https://itunes.apple.com/lookup?id=${collectionId}&entity=song`;
   fetch(url)
     .then((res) => res.json())
@@ -49,9 +87,13 @@ function abrirDetalhes(collectionId) {
       );
       document.getElementById("nome-album").textContent = album.collectionName;
       document.getElementById("nome-artista").textContent = album.artistName;
-      document.getElementById("data-lancamento").textContent = `Lançamento: ${
-        album.releaseDate.split("T")[0]
-      }`;
+      document.getElementById(
+        "data-lancamento"
+      ).textContent = `Lançamento: ${album.releaseDate
+        .split("T")[0]
+        .split("-")
+        .reverse()
+        .join("/")}`;
 
       // Exibe faixas
       const ul = document.getElementById("faixas");
@@ -66,21 +108,28 @@ function abrirDetalhes(collectionId) {
       radios.forEach((r) => (r.checked = false));
       const notaElem = document.getElementById("nota-album");
       const radiosDiv = document.getElementById("notas");
-      // ✅ Verifica se o álbum já está registrado no banco
+      const btnRegistrar = document.getElementById("btn-registrar");
+      const btnEditar = document.getElementById("btn-editar");
+      const btnApagar = document.getElementById("btn-apagar");
+
+      // verificar se nota já está registrada
       fetch(`http://127.0.0.1:5000/album?collectionId=${collectionId}`)
         .then((res) => res.json())
         .then((dados) => {
           if (dados.length > 0) {
-            // Se já existe, exibe a nota e esconde os radios
-            notaElem.textContent = `${dados[0].nota}`;
+            notaElem.innerHTML = `${dados[0].nota} &#x2605;`;
             radiosDiv.style.display = "none";
+            btnRegistrar.style.display = "none";
+            btnApagar.style.display = "inline-block";
+            btnEditar.style.display = "inline-block";
           } else {
-            // Se não existe, limpa o texto e mostra os radios
-            notaElem.textContent = "";
+            notaElem.innerHTML = "";
             radiosDiv.style.display = "block";
+            btnRegistrar.style.display = "inline-block";
+            btnApagar.style.display = "none";
+            btnEditar.style.display = "none";
           }
         });
-
       document.getElementById("album-detalhes").style.display = "flex";
     });
 }
@@ -123,16 +172,39 @@ function registrarAlbum() {
     });
 }
 
+function apagarAlbum() {
+  if (!albumAtual) return;
+
+  fetch(`http://127.0.0.1:5000/album/${albumAtual.collectionId}`, {
+    method: "DELETE",
+  })
+    .then((res) => {
+      if (res.ok) {
+        alert("Álbum deletado com sucesso!");
+        fecharDetalhes();
+        listarAlbunsAvaliados();
+      } else {
+        alert("Erro ao registrar álbum");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Erro na requisição");
+    });
+}
+
 function fecharDetalhes() {
   document.getElementById("album-detalhes").style.display = "none";
   albumAtual = null;
 }
 
 function abrirAba(nomeAba) {
-  document.querySelectorAll(".aba").forEach((aba) => {
-    aba.style.display = "none";
-  });
+  document
+    .querySelectorAll(".aba")
+    .forEach((aba) => (aba.style.display = "none"));
   document.getElementById(nomeAba).style.display = "block";
+
+  abaAtual = nomeAba;
 
   if (nomeAba === "avaliados") {
     listarAlbunsAvaliados();
@@ -140,6 +212,8 @@ function abrirAba(nomeAba) {
 }
 
 function listarAlbunsAvaliados() {
+  albunsAvaliados = [];
+  indiceAtual = 0;
   fetch("http://127.0.0.1:5000/albuns")
     .then((res) => res.json())
     .then((data) => {
@@ -150,7 +224,7 @@ function listarAlbunsAvaliados() {
         container.innerHTML = "<p>Nenhum álbum avaliado ainda.</p>";
         return;
       }
-
+      albunsAvaliados = data;
       data.forEach((album) => {
         const div = document.createElement("div");
         div.className = "album-card";
@@ -158,7 +232,7 @@ function listarAlbunsAvaliados() {
           <img src="" alt="${album.nome}">
           <p>${album.nome}, ${album.ano}</p>
           <p>${album.artista}</p>
-          <p>Nota: ${album.nota}</p>
+          <p>Nota: ${album.nota} &#x2605;</p>
         `;
 
         div.onclick = () => abrirDetalhes(album.collectionId);
