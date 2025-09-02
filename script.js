@@ -106,6 +106,11 @@ function abrirDetalhes(collectionId) {
 
       const radios = document.getElementsByName("nota");
       radios.forEach((r) => (r.checked = false));
+      // limpar caixa de texto
+      const comentario = document.querySelector(".review textarea");
+      const comentarioExistente = document.getElementById("comentario-exibido");
+      if (comentarioExistente) comentarioExistente.style.display = "none";
+
       const notaElem = document.getElementById("nota-album");
       const radiosDiv = document.getElementById("notas");
       const btnRegistrar = document.getElementById("btn-registrar");
@@ -117,19 +122,46 @@ function abrirDetalhes(collectionId) {
         .then((res) => res.json())
         .then((dados) => {
           if (dados.length > 0) {
+            // album já avaliado
             notaElem.innerHTML = `${dados[0].nota} &#x2605;`;
             radiosDiv.style.display = "none";
             btnRegistrar.style.display = "none";
             btnApagar.style.display = "inline-block";
             btnEditar.style.display = "inline-block";
+
+            if (dados[0].critica && dados[0].critica.trim() !== "") {
+              comentario.style.display = "none";
+
+              let comentarioExistente =
+                document.getElementById("comentario-exibido");
+              if (!comentarioExistente) {
+                comentarioExistente = document.createElement("p");
+                comentarioExistente.id = "comentario-exibido";
+                comentarioExistente.className = "comentario-exibido";
+                comentario.parentNode.appendChild(comentarioExistente);
+              }
+              comentarioExistente.textContent = dados[0].critica;
+              comentarioExistente.style.display = "block";
+            } else {
+              comentario.style.display = "none";
+              if (comentarioExistente)
+                comentarioExistente.style.display = "none";
+            }
           } else {
+            // Álbum não avaliado
             notaElem.innerHTML = "";
             radiosDiv.style.display = "block";
             btnRegistrar.style.display = "inline-block";
             btnApagar.style.display = "none";
             btnEditar.style.display = "none";
+
+            // Mostrar textarea para digitar comentário
+            comentario.style.display = "block";
+            comentario.value = "";
+            if (comentarioExistente) comentarioExistente.style.display = "none";
           }
         });
+
       document.getElementById("album-detalhes").style.display = "flex";
     });
 }
@@ -145,12 +177,16 @@ function registrarAlbum() {
 
   if (!notaSelecionada) return alert("Selecione uma nota para o álbum");
 
+  const comentarioElem = document.querySelector(".review textarea");
+  const comentario = comentarioElem ? comentarioElem.value.trim() : "";
+
   const payload = {
     nome: albumAtual.collectionName,
     artista: albumAtual.artistName,
     ano: parseInt(albumAtual.releaseDate.split("-")[0]),
     nota: parseInt(notaSelecionada),
     collectionId: albumAtual.collectionId,
+    critica: comentario,
   };
 
   fetch("http://127.0.0.1:5000/album", {

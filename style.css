@@ -25,6 +25,7 @@ input[type="text"] {
 button {
   padding: 10px 15px;
   border-radius: 10px;
+  margin-top: 8px;
   border: none;
   background: #43248d;
   color: white;
@@ -68,12 +69,12 @@ button {
   border-radius: 10px;
   width: 400px;
   text-align: left;
-  max-height: 80vh; /* para permitir scroll se for muito alto */
+  max-height: 80vh;
   overflow-y: auto;
 }
 
 .close {
-  position: absolute; /* agora se posiciona em relação ao modal-content */
+  position: absolute;
   top: 10px;
   right: 10px;
   font-size: 28px;
@@ -139,4 +140,14 @@ button {
 
 .botoes-navegacao button {
   margin: 0 5px;
+}
+
+.review textarea {
+  width: 300px;
+  height: 80px;
+  resize: none;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  line-height: 1.4;
 }
