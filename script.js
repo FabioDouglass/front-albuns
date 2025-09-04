@@ -31,35 +31,62 @@ function anteriorAlbum() {
 function buscarAlbuns() {
   albunsBuscados = [];
   indiceAtual = 0;
-  const artista = document.getElementById("artista").value;
-  if (!artista) return alert("Digite o nome do artista");
+  const artistaInput = document.getElementById("artista").value;
+  if (!artistaInput) return alert("Digite o nome do artista");
 
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(
-    artista
-  )}&entity=album`;
+  // Substituir espaços por +
+  const artista = encodeURIComponent(
+    document.getElementById("artista").value.trim().replace(/\s+/g, "+")
+  );
+
+  const url = `https://itunes.apple.com/search?term=${artista}&entity=album`;
 
   fetch(url)
-    .then((res) => res.json())
+    .then(async (res) => {
+      if (!res.ok) {
+        throw new Error(`Erro HTTP ${res.status}`);
+      }
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error("Resposta não é JSON válido");
+      }
+    })
     .then((data) => {
+      const resultados = Array.isArray(data.results) ? data.results : [];
+      if (
+        !data.results ||
+        !Array.isArray(data.results) ||
+        data.results.length === 0
+      ) {
+        alert("Nenhum álbum encontrado.");
+        return;
+      }
+
       const container = document.getElementById("albuns-container");
       container.innerHTML = "";
 
-      const albunsOrdenados = data.results.sort((a, b) => {
-        return new Date(b.releaseDate) - new Date(a.releaseDate);
-      });
+      const albunsOrdenados = resultados.sort(
+        (a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)
+      );
       albunsBuscados = albunsOrdenados;
 
       albunsOrdenados.forEach((album) => {
         const div = document.createElement("div");
         div.className = "album-card";
         div.innerHTML = `
-          <img src="${album.artworkUrl100}" alt="${album.collectionName}">
-          <p>${album.collectionName}, ${album.releaseDate.split("-")[0]}</p>
-          <p>${album.artistName}</p>
-        `;
+      <img src="${album.artworkUrl100}" alt="${album.collectionName}">
+      <p>${album.collectionName}, ${album.releaseDate.split("-")[0]}</p>
+      <p>${album.artistName}</p>
+    `;
         div.onclick = () => abrirDetalhes(album.collectionId);
         container.appendChild(div);
       });
+    })
+    .catch((err) => {
+      console.error("Erro ao buscar álbuns:", err);
+      alert("Ocorreu um erro ao buscar os álbuns. Tente novamente.");
     });
 }
 
@@ -217,6 +244,86 @@ function apagarAlbum() {
     .then((res) => {
       if (res.ok) {
         alert("Álbum deletado com sucesso!");
+        fecharDetalhes();
+        listarAlbunsAvaliados();
+      } else {
+        alert("Erro ao registrar álbum");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Erro na requisição");
+    });
+}
+
+function editarAlbum() {
+  if (!albumAtual) return;
+
+  const notaElem = document.getElementById("nota-album");
+  const comentarioExistente = document.getElementById("comentario-exibido");
+  const btnEditar = document.getElementById("btn-editar");
+  const btnApagar = document.getElementById("btn-apagar");
+
+  notaElem.innerHTML = "";
+  if (comentarioExistente) comentarioExistente.style.display = "none";
+  btnEditar.style.display = "none";
+  btnApagar.style.display = "none";
+
+  const radiosDiv = document.getElementById("notas");
+  const comentario = document.querySelector(".review textarea");
+
+  radiosDiv.style.display = "block";
+  comentario.style.display = "block";
+  comentario.value = "";
+
+  // Remove botão salvar antigo, se existir
+  const btnSalvarExistente = document.getElementById("btn-salvar");
+  if (btnSalvarExistente) btnSalvarExistente.remove();
+
+  // Cria botão Salvar
+  const btnSalvar = document.createElement("button");
+  btnSalvar.id = "btn-salvar";
+  btnSalvar.className = "btn-salvar";
+  btnSalvar.textContent = "Salvar";
+
+  // Ao clicar, lê a nota e o comentário dinamicamente
+  btnSalvar.onclick = () => {
+    let notaSelecionada = null;
+    const radios = document.getElementsByName("nota");
+    radios.forEach((r) => {
+      if (r.checked) notaSelecionada = r.value;
+    });
+
+    const comentarioElem = document.querySelector(".review textarea");
+    const textoCritica = comentarioElem ? comentarioElem.value.trim() : null;
+
+    const btnSalvarExistente = document.getElementById("btn-salvar");
+    if (btnSalvarExistente) btnSalvarExistente.remove();
+
+    salvarAlbum(notaSelecionada, textoCritica);
+  };
+
+  // Adiciona o botão ao DOM
+  const reviewDiv = document.querySelector(".review");
+  reviewDiv.appendChild(btnSalvar);
+}
+
+function salvarAlbum(notaSelecionada, textoCritica) {
+  if (!albumAtual || !notaSelecionada) return;
+
+  fetch(`http://127.0.0.1:5000/album/${albumAtual.collectionId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nota: notaSelecionada,
+      critica: textoCritica || null,
+    }),
+  })
+    .then((res) => {
+      if (res.ok) {
+        alert("Álbum atualizado com sucesso!");
         fecharDetalhes();
         listarAlbunsAvaliados();
       } else {
