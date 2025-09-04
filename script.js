@@ -264,6 +264,7 @@ function editarAlbum() {
   const btnEditar = document.getElementById("btn-editar");
   const btnApagar = document.getElementById("btn-apagar");
 
+  // limpa visualizações antigas
   notaElem.innerHTML = "";
   if (comentarioExistente) comentarioExistente.style.display = "none";
   btnEditar.style.display = "none";
@@ -272,21 +273,43 @@ function editarAlbum() {
   const radiosDiv = document.getElementById("notas");
   const comentario = document.querySelector(".review textarea");
 
+  // exibe textarea e radios
   radiosDiv.style.display = "block";
   comentario.style.display = "block";
-  comentario.value = "";
 
-  // Remove botão salvar antigo, se existir
+  // remove botões antigos se existirem
   const btnSalvarExistente = document.getElementById("btn-salvar");
   if (btnSalvarExistente) btnSalvarExistente.remove();
+  const btnCancelarExistente = document.getElementById("btn-cancelar");
+  if (btnCancelarExistente) btnCancelarExistente.remove();
 
-  // Cria botão Salvar
+  // Pega dados atuais do álbum (nota e crítica) para preencher os campos
+  fetch(`http://127.0.0.1:5000/album?collectionId=${albumAtual.collectionId}`)
+    .then((res) => res.json())
+    .then((dados) => {
+      let notaAtual = null;
+      let criticaAtual = "";
+
+      if (dados.length > 0) {
+        notaAtual = dados[0].nota;
+        criticaAtual = dados[0].critica || "";
+      }
+
+      // marca o radio da nota atual
+      const radios = document.getElementsByName("nota");
+      radios.forEach((r) => {
+        r.checked = r.value == notaAtual;
+      });
+
+      // preenche o textarea com a crítica atual
+      comentario.value = criticaAtual;
+    });
+
+  // cria botão Salvar
   const btnSalvar = document.createElement("button");
   btnSalvar.id = "btn-salvar";
   btnSalvar.className = "btn-salvar";
   btnSalvar.textContent = "Salvar";
-
-  // Ao clicar, lê a nota e o comentário dinamicamente
   btnSalvar.onclick = () => {
     let notaSelecionada = null;
     const radios = document.getElementsByName("nota");
@@ -297,15 +320,31 @@ function editarAlbum() {
     const comentarioElem = document.querySelector(".review textarea");
     const textoCritica = comentarioElem ? comentarioElem.value.trim() : null;
 
-    const btnSalvarExistente = document.getElementById("btn-salvar");
-    if (btnSalvarExistente) btnSalvarExistente.remove();
+    // remove os botões ao clicar
+    btnSalvar.remove();
+    btnCancelar.remove();
 
     salvarAlbum(notaSelecionada, textoCritica);
   };
 
-  // Adiciona o botão ao DOM
+  // cria botão Cancelar
+  const btnCancelar = document.createElement("button");
+  btnCancelar.id = "btn-cancelar";
+  btnCancelar.className = "btn-cancelar";
+  btnCancelar.textContent = "Cancelar";
+  btnCancelar.onclick = () => {
+    // remove os botões
+    btnSalvar.remove();
+    btnCancelar.remove();
+
+    // restaura a visualização original do álbum
+    abrirDetalhes(albumAtual.collectionId);
+  };
+
+  // adiciona os botões no DOM
   const reviewDiv = document.querySelector(".review");
   reviewDiv.appendChild(btnSalvar);
+  reviewDiv.appendChild(btnCancelar);
 }
 
 function salvarAlbum(notaSelecionada, textoCritica) {
