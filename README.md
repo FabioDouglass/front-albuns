@@ -14,14 +14,14 @@ cd front-filmes
 **1 - Construir a imagem Docker do projeto**
 
 ```
-docker build -t front-filmes .
+docker build -t front-albuns .
 
 ```
 
 **2 - Iniciar o projeto**
 
 ```
-docker run -p 8080:80 front-filmes
+docker run -p 8080:80 front-albuns
 
 ```
 
