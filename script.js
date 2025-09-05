@@ -34,7 +34,6 @@ function buscarAlbuns() {
   const artistaInput = document.getElementById("artista").value;
   if (!artistaInput) return alert("Digite o nome do artista");
 
-  // Substituir espaços por +
   const artista = encodeURIComponent(
     document.getElementById("artista").value.trim().replace(/\s+/g, "+")
   );
@@ -145,7 +144,7 @@ function abrirDetalhes(collectionId) {
       const btnApagar = document.getElementById("btn-apagar");
 
       // verificar se nota já está registrada
-      fetch(`http://127.0.0.1:5000/album?collectionId=${collectionId}`)
+      fetch(`http://127.0.0.1:5001/album?collectionId=${collectionId}`)
         .then((res) => res.json())
         .then((dados) => {
           if (dados.length > 0) {
@@ -216,7 +215,7 @@ function registrarAlbum() {
     critica: comentario,
   };
 
-  fetch("http://127.0.0.1:5000/album", {
+  fetch("http://127.0.0.1:5001/album", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -238,7 +237,7 @@ function registrarAlbum() {
 function apagarAlbum() {
   if (!albumAtual) return;
 
-  fetch(`http://127.0.0.1:5000/album/${albumAtual.collectionId}`, {
+  fetch(`http://127.0.0.1:5001/album/${albumAtual.collectionId}`, {
     method: "DELETE",
   })
     .then((res) => {
@@ -284,7 +283,7 @@ function editarAlbum() {
   if (btnCancelarExistente) btnCancelarExistente.remove();
 
   // Pega dados atuais do álbum (nota e crítica) para preencher os campos
-  fetch(`http://127.0.0.1:5000/album?collectionId=${albumAtual.collectionId}`)
+  fetch(`http://127.0.0.1:5001/album?collectionId=${albumAtual.collectionId}`)
     .then((res) => res.json())
     .then((dados) => {
       let notaAtual = null;
@@ -350,7 +349,7 @@ function editarAlbum() {
 function salvarAlbum(notaSelecionada, textoCritica) {
   if (!albumAtual || !notaSelecionada) return;
 
-  fetch(`http://127.0.0.1:5000/album/${albumAtual.collectionId}`, {
+  fetch(`http://127.0.0.1:5001/album/${albumAtual.collectionId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -396,7 +395,7 @@ function abrirAba(nomeAba) {
 function listarAlbunsAvaliados() {
   albunsAvaliados = [];
   indiceAtual = 0;
-  fetch("http://127.0.0.1:5000/albuns")
+  fetch("http://127.0.0.1:5001/albuns")
     .then((res) => res.json())
     .then((data) => {
       const container = document.getElementById("albuns-avaliados-container");
