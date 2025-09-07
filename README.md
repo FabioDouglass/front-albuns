@@ -25,6 +25,13 @@ docker run -p 8080:80 front-albuns
 
 ```
 
+**3 - Acessar o front**
+
+```
+abrir no navegador [http://localhost:8080/](http://localhost:8080/)
+
+```
+
 ## Acessar Documentação
 
 Componente backend implementado: acesse [http://127.0.0.1:5001/docs](http://127.0.0.1:5001/docs) no navegador enquanto estiver rodando o projeto api-albuns, dispovível em [https://github.com/FabioDouglass/api-albuns](https://github.com/FabioDouglass/api-albuns)
