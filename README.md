@@ -6,7 +6,7 @@ Frontend para a apicação api-filmes, para gerenciar filmes.
 
 ```bash
 git clone https://github.com/FabioDouglass/front-albuns
-cd front-filmes
+cd front-albuns
 ```
 
 ## Rodar o Projeto
