@@ -28,7 +28,7 @@ docker run -p 8080:80 front-albuns
 **3 - Acessar o front**
 
 ```
-abrir no navegador [http://localhost:8080/](http://localhost:8080/)
+abrir no navegador http://localhost:8080/
 
 ```
 
