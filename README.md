@@ -1,6 +1,6 @@
 # Frontend Acervo Filmes
 
-Frontend para a apicação api-filmes, para gerenciar filmes.
+Frontend para a aplicação api-filmes, para gerenciar filmes.
 
 ## Baixar o projeto
 
