@@ -117,7 +117,7 @@ http://127.0.0.1:5001/albuns
   ```
 
 
-## Fluxograma da Arquitetura da serviço
+## Fluxograma da Arquitetura do serviço
 
 ---
 
